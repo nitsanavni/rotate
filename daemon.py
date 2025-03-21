@@ -2,6 +2,7 @@
 import sys
 import time
 import signal
+import os
 from datetime import datetime, timedelta
 from parse import parse_rotation_file, format_rotation, Timer, Rotation, time_to_str
 
@@ -26,6 +27,28 @@ def update_rotation_file(file_path: str, rotation: Rotation):
     print(f"File updated: {file_path}")
 
 
+def get_ipc_file_path(rotation_file_path: str) -> str:
+    """Generate the IPC file path based on the rotation file path."""
+    return f"{rotation_file_path}.ipc"
+
+
+def read_ipc_commands(ipc_file_path: str):
+    """Read commands from the IPC file and then delete it."""
+    if not os.path.exists(ipc_file_path):
+        return None
+    
+    try:
+        with open(ipc_file_path, 'r') as f:
+            command = f.read().strip()
+        
+        # Delete the file after reading
+        os.unlink(ipc_file_path)
+        return command
+    except Exception as e:
+        print(f"Error reading IPC file: {e}")
+        return None
+
+
 def start_daemon(file_path: str, update_interval: int = 1):
     """Start the daemon process to track remaining time and update the rotation file.
     
@@ -41,6 +64,13 @@ def start_daemon(file_path: str, update_interval: int = 1):
     
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
+    
+    # IPC file path
+    ipc_file_path = get_ipc_file_path(file_path)
+    
+    # Clean up any existing IPC file
+    if os.path.exists(ipc_file_path):
+        os.unlink(ipc_file_path)
     
     # Read the initial rotation file
     with open(file_path, 'r') as f:
@@ -64,8 +94,38 @@ def start_daemon(file_path: str, update_interval: int = 1):
     update_interval = int(update_interval)
     print(f"Update interval: {update_interval} seconds")
     
+    # Flag to indicate if timer is paused
+    is_paused = False
+    pause_timestamp = None
+    
     while True:
         try:
+            # Check for IPC commands
+            command = read_ipc_commands(ipc_file_path)
+            if command:
+                print(f"Received command: {command}")
+                
+                if command == "pause":
+                    if not is_paused:
+                        is_paused = True
+                        pause_timestamp = datetime.now()
+                        print("Timer paused")
+                elif command == "resume":
+                    if is_paused:
+                        # Adjust start timestamp by pause duration
+                        pause_duration = (datetime.now() - pause_timestamp).total_seconds()
+                        start_timestamp = start_timestamp + timedelta(seconds=pause_duration)
+                        is_paused = False
+                        print(f"Timer resumed (paused for {pause_duration:.1f}s)")
+                elif command == "stop":
+                    print("Stopping daemon...")
+                    break
+            
+            # Skip time updates if paused
+            if is_paused:
+                time.sleep(update_interval)
+                continue
+            
             # Calculate time since start
             now = datetime.now()
             seconds_since_start = (now - start_timestamp).total_seconds()

@@ -17,6 +17,12 @@ def main():
         start_timer()
     elif command == "init":
         init_rotation()
+    elif command == "pause":
+        send_command("pause")
+    elif command == "resume":
+        send_command("resume")
+    elif command == "stop":
+        send_command("stop")
     elif command == "help":
         print_usage()
     else:
@@ -28,9 +34,12 @@ def print_usage():
     """Print usage information."""
     print("Usage: rotate <command> [options]")
     print("\nCommands:")
-    print("  init    Initialize a new rotation file")
-    print("  start   Start the timer daemon")
-    print("  help    Show this help message")
+    print("  init     Initialize a new rotation file")
+    print("  start    Start the timer daemon")
+    print("  pause    Pause the running timer")
+    print("  resume   Resume a paused timer")
+    print("  stop     Stop the running timer daemon")
+    print("  help     Show this help message")
 
 
 def init_rotation():
@@ -68,6 +77,32 @@ def init_rotation():
             f.write(f"{member}\n")
 
     print(f"Rotation file created: {output_path}")
+
+
+def get_ipc_file_path(rotation_file_path: str) -> str:
+    """Generate the IPC file path based on the rotation file path."""
+    return f"{rotation_file_path}.ipc"
+
+
+def send_command(command: str):
+    """Send a command to the running daemon via IPC file."""
+    if len(sys.argv) < 3:
+        print(f"Usage: rotate {command} <rotation_file_path>")
+        return
+
+    file_path = sys.argv[2]
+
+    # Check if rotation file exists
+    if not os.path.exists(file_path):
+        print(f"Error: Rotation file not found: {file_path}")
+        return
+
+    # Create IPC file
+    ipc_file_path = get_ipc_file_path(file_path)
+    with open(ipc_file_path, "w") as f:
+        f.write(command)
+
+    print(f"Sent '{command}' command for {file_path}")
 
 
 def start_timer():
