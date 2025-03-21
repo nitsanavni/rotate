@@ -92,17 +92,74 @@ def parse_rotation_file(content: str) -> Rotation:
     return Rotation(timer=timer, positions=positions, team=team)
 
 
-def main(content: str) -> Rotation:
-    """Main function to parse rotation file content."""
-    return parse_rotation_file(content)
+def format_rotation(rotation: Rotation) -> str:
+    """Format a Rotation object back to the rotation file format string."""
+    lines = [str(rotation.timer)]
+    
+    # Add positions with assigned team members
+    for i, position in enumerate(rotation.positions):
+        if i < len(rotation.team):
+            lines.append(f"{position}: {rotation.team[i]}")
+    
+    # Add remaining team members without positions
+    for i in range(len(rotation.positions), len(rotation.team)):
+        lines.append(rotation.team[i])
+    
+    # Return without trailing newline to match original format
+    return "\n".join(lines)
+
+
+def parse_json_to_rotation(json_content: str) -> Rotation:
+    """Parse JSON string to a Rotation object."""
+    try:
+        data = json.loads(json_content)
+        timer = Timer(
+            elapsed=parse_time(data["timer"]["elapsed"]),
+            total=parse_time(data["timer"]["total"])
+        )
+        return Rotation(
+            timer=timer,
+            positions=data["positions"],
+            team=data["team"]
+        )
+    except (json.JSONDecodeError, KeyError, ValueError) as e:
+        raise ValueError(f"Invalid JSON format: {e}")
+
+
+def main(content: str, format_output: bool = False) -> str:
+    """Main function to parse rotation file content or format a rotation object.
+    
+    Args:
+        content: The rotation file content or JSON string (if format_output is True)
+        format_output: If True, parse JSON and output formatted rotation file,
+                       otherwise parse rotation file and output JSON
+    
+    Returns:
+        Formatted output as string (JSON or rotation file format)
+    """
+    if format_output:
+        # Parse JSON to Rotation and format it
+        rotation = parse_json_to_rotation(content)
+        return format_rotation(rotation)
+    else:
+        # Parse rotation file to JSON
+        rotation = parse_rotation_file(content)
+        return json.dumps(rotation.to_dict(), indent=2)
 
 
 if __name__ == "__main__":
     # Read from stdin
     content = sys.stdin.read()
     
-    # Parse and convert to JSON
-    rotation = main(content)
+    # Check if format mode is requested
+    format_output = len(sys.argv) > 1 and sys.argv[1] == "format"
     
-    # Output as JSON
-    print(json.dumps(rotation.to_dict(), indent=2))
+    # Run main function
+    output = main(content, format_output)
+    
+    # Output to stdout (JSON mode adds its own newline, format mode doesn't)
+    if format_output:
+        # Print without trailing newline
+        sys.stdout.write(output)
+    else:
+        print(output)
