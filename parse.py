@@ -19,16 +19,19 @@ class Timer:
 @dataclass
 class Rotation:
     timer: Timer
-    roles: dict[str, str] = field(default_factory=dict)
+    positions: List[str] = field(default_factory=list)
     team: List[str] = field(default_factory=list)
     
     def to_dict(self) -> dict:
         """Convert Rotation object to dictionary for JSON serialization."""
-        result = asdict(self)
-        # Convert time objects to string format
-        result["timer"]["elapsed"] = time_to_str(self.timer.elapsed)
-        result["timer"]["total"] = time_to_str(self.timer.total)
-        return result
+        return {
+            "timer": {
+                "elapsed": time_to_str(self.timer.elapsed),
+                "total": time_to_str(self.timer.total)
+            },
+            "positions": self.positions,
+            "team": self.team
+        }
 
 
 def parse_time(time_str: str) -> time:
@@ -67,25 +70,26 @@ def parse_rotation_file(content: str) -> Rotation:
     # Parse timer line (first line)
     timer = parse_timer_line(lines[0])
     
-    roles = {}
+    positions = []
     team = []
     
-    # Parse roles and team members
+    # Parse positions and team members
     for line in lines[1:]:
         line = line.strip()
         if not line:
             continue
             
-        # Check if line defines a role
-        role_match = re.match(r'(\w+):\s*(.+)', line)
-        if role_match:
-            role, name = role_match.groups()
-            roles[role] = name
+        # Check if line defines a position
+        position_match = re.match(r'(\w+):\s*(.+)', line)
+        if position_match:
+            position, name = position_match.groups()
+            positions.append(position)
+            team.append(name)
         else:
-            # Line is a team member without a role
+            # Line is a team member without a position
             team.append(line)
     
-    return Rotation(timer=timer, roles=roles, team=team)
+    return Rotation(timer=timer, positions=positions, team=team)
 
 
 def main(content: str) -> Rotation:
