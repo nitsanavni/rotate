@@ -111,7 +111,7 @@ def start_daemon(file_path: str, update_interval: int = 1):
                         pause_timestamp = datetime.now()
                         print("Timer paused")
                 elif command == "resume":
-                    if is_paused:
+                    if is_paused and pause_timestamp is not None:
                         # Adjust start timestamp by pause duration
                         pause_duration = (
                             datetime.now() - pause_timestamp

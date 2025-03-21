@@ -34,21 +34,23 @@ def print_usage():
     """Print usage information."""
     print("Usage: rotate <command> [options]")
     print("\nCommands:")
-    print("  init     Initialize a new rotation file")
-    print("  start    Start the timer daemon")
-    print("  pause    Pause the running timer")
-    print("  resume   Resume a paused timer")
-    print("  stop     Stop the running timer daemon")
+    print("  init     Initialize a new rotation file (default: 'rotation')")
+    print("  start    Start the timer daemon (default file: 'rotation')")
+    print("  pause    Pause the running timer (default file: 'rotation')")
+    print("  resume   Resume a paused timer (default file: 'rotation')")
+    print("  stop     Stop the running timer daemon (default file: 'rotation')")
     print("  help     Show this help message")
 
 
 def init_rotation():
     """Initialize a new rotation file from template."""
+    output_path = "rotation"
+    if len(sys.argv) >= 3:
+        output_path = sys.argv[2]
+        
+    team_members_start = 3
     if len(sys.argv) < 3:
-        print("Usage: rotate init <file_path> [team_member1 team_member2 ...]")
-        return
-
-    output_path = sys.argv[2]
+        team_members_start = 2
 
     # Check if file already exists
     if os.path.exists(output_path):
@@ -57,8 +59,8 @@ def init_rotation():
 
     # Get team members from arguments or use defaults
     team_members = (
-        sys.argv[3:]
-        if len(sys.argv) > 3
+        sys.argv[team_members_start:]
+        if len(sys.argv) > team_members_start
         else ["Alice", "Bob", "Charlie", "Diana", "Eva"]
     )
 
@@ -86,11 +88,9 @@ def get_ipc_file_path(rotation_file_path: str) -> str:
 
 def send_command(command: str):
     """Send a command to the running daemon via IPC file."""
-    if len(sys.argv) < 3:
-        print(f"Usage: rotate {command} <rotation_file_path>")
-        return
-
-    file_path = sys.argv[2]
+    file_path = "rotation"
+    if len(sys.argv) >= 3:
+        file_path = sys.argv[2]
 
     # Check if rotation file exists
     if not os.path.exists(file_path):
@@ -107,11 +107,9 @@ def send_command(command: str):
 
 def start_timer():
     """Start the timer daemon."""
-    if len(sys.argv) < 3:
-        print("Usage: rotate start <rotation_file_path> [update_interval]")
-        return
-
-    file_path = sys.argv[2]
+    file_path = "rotation"
+    if len(sys.argv) >= 3:
+        file_path = sys.argv[2]
 
     # Check if file exists
     if not os.path.exists(file_path):
