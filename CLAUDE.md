@@ -1,7 +1,7 @@
 # Rotate Project Guidelines
 
 ## Commands
-- **Run**: `python -m main` or `python main.py`
+- **Run**: `uv run main.py`
 - **Test**: `pytest` or `pytest -xvs tests/` (when tests are added)
 - **Lint**: `ruff check .`
 - **Format**: `black .`
