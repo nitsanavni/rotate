@@ -2,18 +2,18 @@
 import sys
 import json
 import re
-from datetime import time, datetime
-from typing import List, Optional
-from dataclasses import dataclass, field, asdict
+from datetime import time
+from typing import List
+from dataclasses import dataclass, field
 
 
 @dataclass
 class Timer:
-    elapsed: time
+    remaining: time
     total: time
     
     def __str__(self) -> str:
-        return f"{time_to_str(self.elapsed)} / {time_to_str(self.total)}"
+        return f"{time_to_str(self.remaining)} / {time_to_str(self.total)}"
 
 
 @dataclass
@@ -26,7 +26,7 @@ class Rotation:
         """Convert Rotation object to dictionary for JSON serialization."""
         return {
             "timer": {
-                "elapsed": time_to_str(self.timer.elapsed),
+                "remaining": time_to_str(self.timer.remaining),
                 "total": time_to_str(self.timer.total)
             },
             "positions": self.positions,
@@ -49,15 +49,15 @@ def time_to_str(t: time) -> str:
 
 
 def parse_timer_line(line: str) -> Timer:
-    """Parse the timer line format 'elapsed / total'."""
+    """Parse the timer line format 'remaining / total'."""
     match = re.match(r'(\d+:\d+)\s*/\s*(\d+:\d+)', line)
     if not match:
         raise ValueError(f"Invalid timer format: {line}")
     
-    elapsed_str, total_str = match.groups()
-    elapsed = parse_time(elapsed_str)
+    remaining_str, total_str = match.groups()
+    remaining = parse_time(remaining_str)
     total = parse_time(total_str)
-    return Timer(elapsed=elapsed, total=total)
+    return Timer(remaining=remaining, total=total)
 
 
 def parse_rotation_file(content: str) -> Rotation:
@@ -114,7 +114,7 @@ def parse_json_to_rotation(json_content: str) -> Rotation:
     try:
         data = json.loads(json_content)
         timer = Timer(
-            elapsed=parse_time(data["timer"]["elapsed"]),
+            remaining=parse_time(data["timer"]["remaining"]),
             total=parse_time(data["timer"]["total"])
         )
         return Rotation(
