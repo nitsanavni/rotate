@@ -5,6 +5,7 @@ import signal
 import os
 from datetime import datetime, timedelta
 from parse import parse_rotation_file, format_rotation, Timer, Rotation, time_to_str
+from rotate import rotate_team
 
 
 def time_to_timedelta(t) -> timedelta:
@@ -162,7 +163,18 @@ def start_daemon(file_path: str, update_interval: int = 1):
 
             # Check if timer has expired
             if new_remaining_seconds <= 0:
-                print("\nTimer expired!")
+                print("\nTimer expired! Triggering rotation...")
+                
+                # Rotate the team
+                updated_rotation = rotate_team(updated_rotation)
+                
+                # Reset the turn timer to total
+                updated_rotation.timer.remaining = updated_rotation.timer.total
+                
+                # Update the file with the rotated team
+                update_rotation_file(file_path, updated_rotation)
+                
+                print("Rotation complete. Use 'rotate start' to start the next timer.")
                 break
 
             # Sleep for the update interval
