@@ -171,20 +171,20 @@ def start_daemon(file_path: str, update_interval: int = 1):
             # Check if timer has expired
             if new_remaining_seconds <= 0:
                 print("\nTimer expired! Triggering rotation...")
-                
+
                 # Trigger the expire hook before rotating
                 print("Triggering expire hook...")
                 execute_hooks("expire")
-                
+
                 # Rotate the team
                 updated_rotation = rotate_team(updated_rotation)
-                
+
                 # Reset the turn timer to total
                 updated_rotation.timer.remaining = updated_rotation.timer.total
-                
+
                 # Update the file with the rotated team
                 update_rotation_file(file_path, updated_rotation)
-                
+
                 print("Rotation complete. Use 'rotate start' to start the next timer.")
                 break
 

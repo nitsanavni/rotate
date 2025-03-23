@@ -51,7 +51,7 @@ def init_rotation():
     output_path = "rotation"
     if len(sys.argv) >= 3:
         output_path = sys.argv[2]
-        
+
     team_members_start = 3
     if len(sys.argv) < 3:
         team_members_start = 2
@@ -83,7 +83,7 @@ def init_rotation():
             f.write(f"{member}\n")
 
     print(f"Rotation file created: {output_path}")
-    
+
     # Create hooks directory
     hooks_dir = ensure_hooks_directory_exists()
     print(f"Hooks directory created: {hooks_dir}")
