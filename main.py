@@ -3,6 +3,7 @@ import sys
 import os
 import subprocess
 from pathlib import Path
+from hooks import ensure_hooks_directory_exists
 
 
 def main():
@@ -40,6 +41,9 @@ def print_usage():
     print("  resume   Resume a paused timer (default file: 'rotation')")
     print("  stop     Stop the running timer daemon (default file: 'rotation')")
     print("  help     Show this help message")
+    print("\nHooks:")
+    print("  Place executable scripts in the .rotate/hooks/ directory.")
+    print("  The 'expire' hook runs when timer expires or the daemon stops.")
 
 
 def init_rotation():
@@ -79,6 +83,10 @@ def init_rotation():
             f.write(f"{member}\n")
 
     print(f"Rotation file created: {output_path}")
+    
+    # Create hooks directory
+    hooks_dir = ensure_hooks_directory_exists()
+    print(f"Hooks directory created: {hooks_dir}")
 
 
 def get_ipc_file_path(rotation_file_path: str) -> str:

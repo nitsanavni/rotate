@@ -53,3 +53,25 @@ The rotation file format consists of:
 
 - Python 3.12+
 - uv package manager
+
+## Hooks
+
+The rotate tool supports hooks that are executed when specific events occur:
+
+1. Create a directory called `.rotate/hooks/` in your project
+2. Place executable scripts in this directory with names matching the event you want to hook into
+3. Currently supported hooks:
+   - `expire`: Executed when the timer expires or the daemon stops
+
+Example hook script (`.rotate/hooks/expire`):
+```sh
+#!/bin/sh
+# This hook opens the rotation file when the timer expires
+echo "Opening rotation file..."
+open rotation
+```
+
+Make sure to make your hook script executable:
+```sh
+chmod +x .rotate/hooks/expire
+```

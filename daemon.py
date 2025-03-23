@@ -6,6 +6,7 @@ import os
 from datetime import datetime, timedelta
 from parse import parse_rotation_file, format_rotation, Timer, Rotation, time_to_str
 from rotate import rotate_team
+from hooks import execute_hooks
 
 
 def time_to_timedelta(t) -> timedelta:
@@ -61,6 +62,9 @@ def start_daemon(file_path: str, update_interval: int = 1):
 
     def signal_handler(sig, frame):
         print("\nDaemon stopping...")
+        # Trigger exit hooks before terminating
+        print("Triggering expire hook before exit...")
+        execute_hooks("expire")
         sys.exit(0)
 
     signal.signal(signal.SIGINT, signal_handler)
@@ -124,6 +128,9 @@ def start_daemon(file_path: str, update_interval: int = 1):
                         print(f"Timer resumed (paused for {pause_duration:.1f}s)")
                 elif command == "stop":
                     print("Stopping daemon...")
+                    # Trigger expire hook before stopping
+                    print("Triggering expire hook before stop...")
+                    execute_hooks("expire")
                     break
 
             # Skip time updates if paused
@@ -164,6 +171,10 @@ def start_daemon(file_path: str, update_interval: int = 1):
             # Check if timer has expired
             if new_remaining_seconds <= 0:
                 print("\nTimer expired! Triggering rotation...")
+                
+                # Trigger the expire hook before rotating
+                print("Triggering expire hook...")
+                execute_hooks("expire")
                 
                 # Rotate the team
                 updated_rotation = rotate_team(updated_rotation)
