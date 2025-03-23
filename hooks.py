@@ -5,13 +5,36 @@ import sys
 from typing import List
 
 
+def get_rotate_directory() -> str:
+    """Return the path to the .rotate directory."""
+    return os.path.join(os.getcwd(), ".rotate")
+
+
 def get_hooks_directory() -> str:
     """Return the path to the hooks directory."""
-    return os.path.join(os.getcwd(), ".rotate", "hooks")
+    return os.path.join(get_rotate_directory(), "hooks")
+
+
+def ensure_rotate_directory_exists() -> str:
+    """Ensure the .rotate directory exists, add .gitignore, and return its path."""
+    rotate_dir = get_rotate_directory()
+    os.makedirs(rotate_dir, exist_ok=True)
+    
+    # Create .gitignore file to prevent committing .rotate contents
+    gitignore_path = os.path.join(rotate_dir, ".gitignore")
+    if not os.path.exists(gitignore_path):
+        with open(gitignore_path, "w") as f:
+            f.write("*\n")
+    
+    return rotate_dir
 
 
 def ensure_hooks_directory_exists() -> str:
     """Ensure the hooks directory exists and return its path."""
+    # First ensure parent .rotate directory exists with .gitignore
+    ensure_rotate_directory_exists()
+    
+    # Then create hooks subdirectory
     hooks_dir = get_hooks_directory()
     os.makedirs(hooks_dir, exist_ok=True)
     return hooks_dir
