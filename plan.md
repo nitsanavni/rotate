@@ -7,10 +7,10 @@
 - [ ] hook library
   - [ ] ding
   - [ ] say the names
-  - [ ] `open $ROTATION_FILE`
+  - [x] `open $ROTATION_FILE`
     - other vars: $TALKING, $POSITON<N>, $NAME<N>, $TURN_DURATION, $TEAM_SIZE, $NAMES, $POSITIONS
 - [ ] `rotate watch` cmd
-- [ ] `rotate cat` cmd
+- [x] `rotate cat` cmd
 - [ ] `rotate randomize` command
 - [ ] `rotate PROMPT` command: prompts an llm to modify the rotation file
   - `--dry-run` option
