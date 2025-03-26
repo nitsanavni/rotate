@@ -59,8 +59,14 @@ def list_hooks(event_name: str) -> List[str]:
     return []
 
 
-def execute_hooks(event_name: str) -> None:
-    """Execute all hooks for the given event."""
+def execute_hooks(event_name: str, rotation_file_path: str | None = None) -> None:
+    """Execute all hooks for the given event.
+    
+    Args:
+        event_name: The name of the event triggering the hooks
+        rotation_file_path: Optional path to the rotation file, to be passed
+                           as ROTATION_FILE environment variable to hooks
+    """
     hooks = list_hooks(event_name)
     if not hooks:
         print(f"No hooks found for event: {event_name}")
@@ -68,12 +74,19 @@ def execute_hooks(event_name: str) -> None:
 
     print(f"Executing {len(hooks)} hook(s) for event '{event_name}'...")
 
+    # Prepare environment with ROTATION_FILE if provided
+    env = os.environ.copy()
+    if rotation_file_path:
+        env["ROTATION_FILE"] = rotation_file_path
+        print(f"Setting ROTATION_FILE={rotation_file_path} for hooks")
+
     for hook_path in hooks:
         try:
             print(f"Running hook: {hook_path}")
             # Run the hook as a detached process so it doesn't block the daemon
             subprocess.Popen(
                 hook_path,
+                env=env,
                 start_new_session=True,  # Disown the process
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,

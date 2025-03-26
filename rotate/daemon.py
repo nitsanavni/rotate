@@ -70,7 +70,7 @@ def start_daemon(file_path: str, update_interval: int = 1):
         print("\nDaemon stopping...")
         # Trigger exit hooks before terminating
         print("Triggering expire hook before exit...")
-        execute_hooks("expire")
+        execute_hooks("expire", file_path)
         sys.exit(0)
 
     signal.signal(signal.SIGINT, signal_handler)
@@ -178,7 +178,7 @@ def start_daemon(file_path: str, update_interval: int = 1):
 
                 # Trigger the expire hook before rotating
                 print("Triggering expire hook...")
-                execute_hooks("expire")
+                execute_hooks("expire", file_path)
 
                 # Rotate the team
                 updated_rotation = rotate_team(updated_rotation)
