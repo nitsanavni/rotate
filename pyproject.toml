@@ -5,10 +5,11 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = []
+authors = [{name = "Nitsan Avni", email = "nitsanav@gmail.com"}]
+license = {text = "MIT"}
 
 [project.scripts]
 rotate = "rotate.main:main"
-rotate-daemon = "rotate.daemon:main"
 
 [tool.uv]
 package = true
@@ -16,7 +17,5 @@ package = true
 [tool.uv.sources]
 rotate = { workspace = true }
 
-[dependency-groups]
-dev = [
-    "rotate",
-]
+[project.urls]
+Homepage = "https://github.com/nitsanavni/rotate"
