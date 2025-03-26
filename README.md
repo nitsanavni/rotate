@@ -2,14 +2,17 @@ A CLI for mobbing rotations.
 
 ## Installation
 
-```bash
-pipx install rotate-mob
-```
-
-Or:
+The pkg on PyPI is called `rotate-mob`.  
+One way to install it is:
 
 ```bash
 uv tool install rotate-mob
+```
+
+Then it's available as an executable `rotate`:
+
+```bash
+rotate help
 ```
 
 ## Usage
