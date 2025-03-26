@@ -2,9 +2,27 @@
 
 A CLI tool for mob programming rotations.
 
+## Installation
+
+```bash
+pip install rotate-mob
+```
+
+Or with uv:
+
+```bash
+uv pip install rotate-mob
+```
+
 ## Usage
 
-### Create a rotation file template
+### Initialize a new rotation file
+
+```bash
+rotate init [filename] [team members...]
+```
+
+This creates a new rotation file with default team members or the ones you specify:
 
 ```
 5:00 / 5:00
@@ -15,30 +33,34 @@ Diana
 Eva
 ```
 
-### Parse a rotation file to JSON
+### Start a timer for a rotation session
 
 ```bash
-uv run parse.py < rotation.template
+rotate start [filename] [update_interval]
 ```
 
-### Convert JSON back to rotation file format
+This starts a timer daemon that will update the elapsed time in the rotation file.
+
+### Control the timer
 
 ```bash
-uv run parse.py < rotation.template | uv run parse.py format
+rotate pause [filename]  # Pause the timer
+rotate resume [filename] # Resume a paused timer
+rotate stop [filename]   # Stop the timer
 ```
 
-### Rotate the team
-
-Move each team member up one position in the rotation, with the first person becoming last:
+### Help
 
 ```bash
-uv run rotate.py < rotation.template
+rotate help
 ```
 
-You can chain multiple rotations:
+### Manual rotation
+
+If you want to manually rotate team members:
 
 ```bash
-uv run rotate.py < rotation.template | uv run rotate.py | uv run rotate.py
+cat rotation | rotate > new-rotation
 ```
 
 ## File Format
@@ -48,11 +70,6 @@ The rotation file format consists of:
 1. First line: Timer in format `elapsed / total` where both values are in MM:SS format
 2. Subsequent lines with colon: Position assignments in format `Position: Name`
 3. Remaining lines: Team members without assigned positions
-
-## Requirements
-
-- Python 3.12+
-- uv package manager
 
 ## Hooks
 
@@ -75,3 +92,7 @@ Make sure to make your hook script executable:
 ```sh
 chmod +x .rotate/hooks/expire
 ```
+
+## Requirements
+
+- Python 3.12+
