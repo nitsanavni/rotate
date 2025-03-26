@@ -1,6 +1,6 @@
 [project]
 name = "rotate-mob"
-version = "0.1.1"
+version = "0.1.2"
 description = "A CLI for mob programming rotations"
 readme = "README.md"
 requires-python = ">=3.12"
