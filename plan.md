@@ -1,13 +1,14 @@
+- [ ] default rotation file is `.rotate/rotation`
 - [ ] stop shouldn't trigger the hook
 - [ ] support `$ROTATION_FILE` env var in hooks
 - [ ] `rotate rotate` command
+
 - [ ] hook per person
 - [ ] hook library
   - [ ] ding
   - [ ] say the names
   - [ ] `open $ROTATION_FILE`
     - other vars: $TALKING, $POSITON<N>, $NAME<N>, $TURN_DURATION, $TEAM_SIZE, $NAMES, $POSITIONS
-- [ ] default rotation file is `.rotate/rotation`
 - [ ] `rotate watch` cmd
 - [ ] `rotate cat` cmd
 - [ ] `rotate randomize` command
