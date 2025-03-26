@@ -134,9 +134,7 @@ def start_daemon(file_path: str, update_interval: int = 1):
                         print(f"Timer resumed (paused for {pause_duration:.1f}s)")
                 elif command == "stop":
                     print("Stopping daemon...")
-                    # Trigger expire hook before stopping
-                    print("Triggering expire hook before stop...")
-                    execute_hooks("expire")
+                    # Stop without triggering the expire hook
                     break
 
             # Skip time updates if paused
