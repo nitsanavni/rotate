@@ -1,7 +1,7 @@
 - [x] default rotation file is `.rotate/rotation`
 - [x] stop shouldn't trigger the hook
 - [x] support `$ROTATION_FILE` env var in hooks
-- [ ] `rotate rotate` command
+- [x] `rotate rotate` command
 
 - [ ] hook per person
 - [ ] hook library
