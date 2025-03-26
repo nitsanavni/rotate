@@ -53,21 +53,12 @@ This starts a timer daemon that will update the elapsed time in the rotation fil
 ### Other cmds
 
 ```bash
+rotate rotate [count]
 rotate pause [filename]
 rotate resume [filename]
 rotate stop [filename]
 rotate help
 ```
-
-### Manual rotation
-
-If you want to manually rotate team members:
-
-```bash
-cat rotation | rotate > new-rotation
-```
-
-> TODO: this should be `rotate rotate`
 
 ## File Format
 
