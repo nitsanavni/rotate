@@ -3,16 +3,6 @@ revision = 1
 requires-python = ">=3.12"
 
 [[package]]
-name = "rotate"
+name = "rotate-mob"
 version = "0.1.0"
 source = { editable = "." }
-
-[package.dev-dependencies]
-dev = [
-    { name = "rotate" },
-]
-
-[package.metadata]
-
-[package.metadata.requires-dev]
-dev = [{ name = "rotate", editable = "." }]
