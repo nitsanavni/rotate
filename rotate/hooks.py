@@ -61,7 +61,7 @@ def list_hooks(event_name: str) -> List[str]:
 
 def execute_hooks(event_name: str, rotation_file_path: str | None = None) -> None:
     """Execute all hooks for the given event.
-    
+
     Args:
         event_name: The name of the event triggering the hooks
         rotation_file_path: Optional path to the rotation file, to be passed
