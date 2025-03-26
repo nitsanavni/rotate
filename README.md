@@ -1,28 +1,22 @@
-# Rotate
-
-A CLI tool for mob programming rotations.
+A CLI for mobbing rotations.
 
 ## Installation
 
 ```bash
-pip install rotate-mob
+pipx install rotate-mob
 ```
 
-Or with uv:
+Or:
 
 ```bash
-uv pip install rotate-mob
+uv tool install rotate-mob
 ```
 
 ## Usage
 
-### Initialize a new rotation file
+### The Rotation File
 
-```bash
-rotate init [filename] [team members...]
-```
-
-This creates a new rotation file with default team members or the ones you specify:
+Rotation files look like this:
 
 ```
 5:00 / 5:00
@@ -33,25 +27,32 @@ Diana
 Eva
 ```
 
-### Start a timer for a rotation session
+You can create a fresh one with
 
 ```bash
-rotate start [filename] [update_interval]
+rotate init [filename] [team members...]
+```
+
+This creates a new rotation file with default team members or the ones you specify.
+
+
+### Start the timer
+
+```bash
+rotate start [filename]
 ```
 
 This starts a timer daemon that will update the elapsed time in the rotation file.
 
-### Control the timer
+> [!TIP]
+> Watch the file updated live with `watch -n 0.3 -t cat rotation`
+
+### Other cmds
 
 ```bash
-rotate pause [filename]  # Pause the timer
-rotate resume [filename] # Resume a paused timer
-rotate stop [filename]   # Stop the timer
-```
-
-### Help
-
-```bash
+rotate pause [filename]
+rotate resume [filename]
+rotate stop [filename]
 rotate help
 ```
 
@@ -62,6 +63,8 @@ If you want to manually rotate team members:
 ```bash
 cat rotation | rotate > new-rotation
 ```
+
+> TODO: this should be `rotate rotate`
 
 ## File Format
 
