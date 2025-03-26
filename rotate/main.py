@@ -3,6 +3,8 @@ import sys
 import os
 import subprocess
 from rotate.hooks import ensure_hooks_directory_exists
+from rotate.parse import parse_rotation_file, format_rotation
+from rotate.rotate import rotate_team
 
 
 def main():
@@ -23,6 +25,8 @@ def main():
         send_command("resume")
     elif command == "stop":
         send_command("stop")
+    elif command == "rotate":
+        rotate_team_members()
     elif command == "help":
         print_usage()
     else:
@@ -39,6 +43,7 @@ def print_usage():
     print("  pause    Pause the running timer (default file: '.rotate/rotation')")
     print("  resume   Resume a paused timer (default file: '.rotate/rotation')")
     print("  stop     Stop the running timer daemon (default file: '.rotate/rotation')")
+    print("  rotate   Rotate team members [count] [file] (default file: '.rotate/rotation')")
     print("  help     Show this help message")
     print("\nHooks:")
     print("  Place executable scripts in the .rotate/hooks/ directory.")
@@ -146,6 +151,60 @@ def start_timer():
         print(f"Timer daemon started for {file_path}")
     except Exception as e:
         print(f"Error starting daemon: {e}")
+
+
+def rotate_team_members():
+    """Rotate team members in the rotation file."""
+    from rotate.hooks import get_default_rotation_file_path
+    
+    # Determine rotation file path
+    args_idx = 2
+    file_path = get_default_rotation_file_path()
+    
+    # Check if next arg is a number or a file path
+    if len(sys.argv) >= 3:
+        if sys.argv[2].isdigit():
+            count = int(sys.argv[2])
+            args_idx = 3  # File path might be at position 3
+        else:
+            count = 1
+            file_path = sys.argv[2]
+    else:
+        count = 1
+    
+    # Check if there's a file path after count
+    if len(sys.argv) > args_idx:
+        file_path = sys.argv[args_idx]
+
+    # Check if rotation file exists
+    if not os.path.exists(file_path):
+        print(f"Error: Rotation file not found: {file_path}")
+        return
+
+    try:
+        # Read current rotation
+        with open(file_path, "r") as f:
+            content = f.read()
+        
+        # Parse the rotation file
+        rotation = parse_rotation_file(content)
+        
+        # Rotate the team multiple times if specified
+        rotated = rotation
+        for _ in range(count):
+            rotated = rotate_team(rotated)
+        
+        # Format the rotated rotation
+        output = format_rotation(rotated)
+        
+        # Write back to file
+        with open(file_path, "w") as f:
+            f.write(output)
+            
+        times = "time" if count == 1 else "times"
+        print(f"Team rotated {count} {times} in {file_path}")
+    except Exception as e:
+        print(f"Error rotating team: {e}")
 
 
 if __name__ == "__main__":
