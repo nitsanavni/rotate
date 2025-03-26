@@ -34,11 +34,11 @@ def print_usage():
     """Print usage information."""
     print("Usage: rotate <command> [options]")
     print("\nCommands:")
-    print("  init     Initialize a new rotation file (default: 'rotation')")
-    print("  start    Start the timer daemon (default file: 'rotation')")
-    print("  pause    Pause the running timer (default file: 'rotation')")
-    print("  resume   Resume a paused timer (default file: 'rotation')")
-    print("  stop     Stop the running timer daemon (default file: 'rotation')")
+    print("  init     Initialize a new rotation file (default: '.rotate/rotation')")
+    print("  start    Start the timer daemon (default file: '.rotate/rotation')")
+    print("  pause    Pause the running timer (default file: '.rotate/rotation')")
+    print("  resume   Resume a paused timer (default file: '.rotate/rotation')")
+    print("  stop     Stop the running timer daemon (default file: '.rotate/rotation')")
     print("  help     Show this help message")
     print("\nHooks:")
     print("  Place executable scripts in the .rotate/hooks/ directory.")
@@ -47,7 +47,13 @@ def print_usage():
 
 def init_rotation():
     """Initialize a new rotation file from template."""
-    output_path = "rotation"
+    from rotate.hooks import get_default_rotation_file_path, ensure_rotate_directory_exists
+    
+    # Ensure .rotate directory exists
+    ensure_rotate_directory_exists()
+    
+    # Default to .rotate/rotation
+    output_path = get_default_rotation_file_path()
     if len(sys.argv) >= 3:
         output_path = sys.argv[2]
 
@@ -95,7 +101,9 @@ def get_ipc_file_path(rotation_file_path: str) -> str:
 
 def send_command(command: str):
     """Send a command to the running daemon via IPC file."""
-    file_path = "rotation"
+    from rotate.hooks import get_default_rotation_file_path
+    
+    file_path = get_default_rotation_file_path()
     if len(sys.argv) >= 3:
         file_path = sys.argv[2]
 
@@ -114,7 +122,9 @@ def send_command(command: str):
 
 def start_timer():
     """Start the timer daemon."""
-    file_path = "rotation"
+    from rotate.hooks import get_default_rotation_file_path
+    
+    file_path = get_default_rotation_file_path()
     if len(sys.argv) >= 3:
         file_path = sys.argv[2]
 

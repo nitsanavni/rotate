@@ -10,6 +10,11 @@ def get_rotate_directory() -> str:
     return os.path.join(os.getcwd(), ".rotate")
 
 
+def get_default_rotation_file_path() -> str:
+    """Return the path to the default rotation file."""
+    return os.path.join(get_rotate_directory(), "rotation")
+
+
 def get_hooks_directory() -> str:
     """Return the path to the hooks directory."""
     return os.path.join(get_rotate_directory(), "hooks")
