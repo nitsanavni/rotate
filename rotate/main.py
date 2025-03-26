@@ -133,7 +133,7 @@ def start_timer():
     try:
         # Start daemon process in background
         subprocess.Popen(
-            [sys.executable, str(daemon_script), file_path, update_interval],
+            [sys.executable, "-m", "rotate-daemon", file_path, update_interval],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )

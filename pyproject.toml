@@ -5,3 +5,10 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = []
+
+[project.scripts]
+rotate = "rotate.main:main"
+rotate-daemon = "rotate.daemon:main"
+
+[tool.uv]
+package = true
