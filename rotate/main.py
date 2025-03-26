@@ -27,6 +27,10 @@ def main():
         send_command("stop")
     elif command == "rotate":
         rotate_team_members()
+    elif command == "cat":
+        cat_rotation_file()
+    elif command == "open" or command == "edit":
+        open_rotation_file()
     elif command == "help":
         print_usage()
     else:
@@ -46,6 +50,8 @@ def print_usage():
     print(
         "  rotate   Rotate team members [count] [file] (default file: '.rotate/rotation')"
     )
+    print("  cat      Display the content of the rotation file")
+    print("  open     Open the rotation file in your default editor (also: edit)")
     print("  help     Show this help message")
     print("\nHooks:")
     print("  Place executable scripts in the .rotate/hooks/ directory.")
@@ -210,6 +216,66 @@ def rotate_team_members():
         print(f"Team rotated {count} {times} in {file_path}")
     except Exception as e:
         print(f"Error rotating team: {e}")
+
+
+def cat_rotation_file():
+    """Display the content of the rotation file to stdout."""
+    from rotate.hooks import get_default_rotation_file_path
+
+    # Determine rotation file path
+    file_path = get_default_rotation_file_path()
+    if len(sys.argv) >= 3:
+        file_path = sys.argv[2]
+
+    # Check if rotation file exists
+    if not os.path.exists(file_path):
+        print(f"Error: Rotation file not found: {file_path}")
+        return
+
+    try:
+        # Read and print file content
+        with open(file_path, "r") as f:
+            content = f.read()
+
+        print(content, end="")
+    except Exception as e:
+        print(f"Error reading rotation file: {e}")
+
+
+def open_rotation_file():
+    """Open the rotation file in the default editor."""
+    from rotate.hooks import get_default_rotation_file_path
+
+    # Determine rotation file path
+    file_path = get_default_rotation_file_path()
+    if len(sys.argv) >= 3:
+        file_path = sys.argv[2]
+
+    # Check if rotation file exists
+    if not os.path.exists(file_path):
+        print(f"Error: Rotation file not found: {file_path}")
+        return
+
+    try:
+        # Determine editor to use
+        editor = os.environ.get("EDITOR", os.environ.get("VISUAL", None))
+
+        if editor:
+            # Use specified editor from environment variable
+            subprocess.Popen([editor, file_path])
+            print(f"Opened {file_path} with {editor}")
+        else:
+            # Try to use platform-specific open command
+            if sys.platform == "darwin":  # macOS
+                subprocess.Popen(["open", file_path])
+            elif sys.platform == "win32":  # Windows
+                os.startfile(file_path)
+            else:  # Linux/Unix
+                subprocess.Popen(["xdg-open", file_path])
+
+            print(f"Opened {file_path} with default application")
+    except Exception as e:
+        print(f"Error opening rotation file: {e}")
 
 
 if __name__ == "__main__":
