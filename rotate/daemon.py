@@ -4,9 +4,9 @@ import time
 import signal
 import os
 from datetime import datetime, timedelta
-from parse import parse_rotation_file, format_rotation, Timer, Rotation, time_to_str
-from rotate import rotate_team
-from hooks import execute_hooks
+from rotate.parse import parse_rotation_file, format_rotation, Timer, Rotation, time_to_str
+from rotate.rotate import rotate_team
+from rotate.hooks import execute_hooks
 
 
 def time_to_timedelta(t) -> timedelta:

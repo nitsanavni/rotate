@@ -12,3 +12,11 @@ rotate-daemon = "rotate.daemon:main"
 
 [tool.uv]
 package = true
+
+[tool.uv.sources]
+rotate = { workspace = true }
+
+[dependency-groups]
+dev = [
+    "rotate",
+]

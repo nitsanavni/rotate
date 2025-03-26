@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import sys
-from parse import parse_rotation_file, format_rotation, Rotation
+from rotate.parse import parse_rotation_file, format_rotation, Rotation
 
 
 def rotate_team(rotation: Rotation) -> Rotation:

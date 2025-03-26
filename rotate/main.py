@@ -2,8 +2,7 @@
 import sys
 import os
 import subprocess
-from pathlib import Path
-from hooks import ensure_hooks_directory_exists
+from rotate.hooks import ensure_hooks_directory_exists
 
 
 def main():
@@ -127,13 +126,10 @@ def start_timer():
     # Get update interval if provided
     update_interval = sys.argv[3] if len(sys.argv) > 3 else "1"
 
-    # Get the path to daemon.py relative to this script
-    daemon_script = Path(__file__).parent / "daemon.py"
-
     try:
         # Start daemon process in background
         subprocess.Popen(
-            [sys.executable, "-m", "rotate-daemon", file_path, update_interval],
+            [sys.executable, "-m", "rotate.daemon", file_path, update_interval],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
