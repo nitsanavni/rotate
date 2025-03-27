@@ -29,9 +29,7 @@ def update_rotation_file(file_path: str, rotation: Rotation):
     print(f"File updated: {file_path}")
 
 
-def start_daemon(file_path: str, update_interval: int = 1):
-    print(f"Starting daemon for {file_path}...")
-
+def setup_signal_handlers(file_path: str) -> None:
     def signal_handler(sig, frame):
         print("\nDaemon stopping...")
         print("Triggering expire hook before exit...")
@@ -41,16 +39,101 @@ def start_daemon(file_path: str, update_interval: int = 1):
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
 
-    cleanup_ipc_file(file_path)
 
+def load_initial_rotation(file_path: str) -> tuple[Rotation, float, float]:
     try:
         rotation = read_rotation_file(file_path)
         print(f"Initial content loaded from: {file_path}")
 
         total_seconds = time_to_timedelta(rotation.timer.total).total_seconds()
         remaining_seconds = time_to_timedelta(rotation.timer.remaining).total_seconds()
+        return rotation, total_seconds, remaining_seconds
     except Exception as e:
         print(f"Error reading rotation file: {e}")
+        raise
+
+
+def handle_command(
+    command: str,
+    is_paused: bool,
+    pause_timestamp: datetime | None,
+    start_timestamp: datetime,
+) -> tuple[bool, datetime | None, datetime, bool]:
+    should_stop = False
+
+    if command == "pause":
+        if not is_paused:
+            is_paused = True
+            pause_timestamp = datetime.now()
+            print("Timer paused")
+    elif command == "resume":
+        if is_paused and pause_timestamp is not None:
+            pause_duration = (datetime.now() - pause_timestamp).total_seconds()
+            start_timestamp = start_timestamp + timedelta(seconds=pause_duration)
+            is_paused = False
+            print(f"Timer resumed (paused for {pause_duration:.1f}s)")
+    elif command == "stop":
+        print("Stopping daemon...")
+        should_stop = True
+
+    return is_paused, pause_timestamp, start_timestamp, should_stop
+
+
+def update_timer(
+    file_path: str,
+    rotation: Rotation,
+    remaining_seconds: float,
+    total_seconds: float,
+    start_timestamp: datetime,
+) -> tuple[Rotation, float, bool]:
+    now = datetime.now()
+    seconds_since_start = (now - start_timestamp).total_seconds()
+    new_remaining_seconds = remaining_seconds - seconds_since_start
+
+    if new_remaining_seconds < 0:
+        new_remaining_seconds = 0
+
+    remaining_time = timedelta_to_time(timedelta(seconds=new_remaining_seconds))
+    updated_timer = Timer(remaining=remaining_time, total=rotation.timer.total)
+    updated_rotation = Rotation(
+        timer=updated_timer, positions=rotation.positions, team=rotation.team
+    )
+
+    update_rotation_file(file_path, updated_rotation)
+
+    elapsed = total_seconds - new_remaining_seconds
+    print(
+        f"Updated: Remaining: {time_to_str(remaining_time)}, "
+        f"Elapsed: {int(elapsed // 60)}:{int(elapsed % 60):02d}"
+    )
+
+    timer_expired = new_remaining_seconds <= 0
+    return updated_rotation, new_remaining_seconds, timer_expired
+
+
+def handle_timer_expiration(file_path: str, updated_rotation: Rotation) -> Rotation:
+    print("\nTimer expired! Triggering rotation...")
+    print("Triggering expire hook...")
+    execute_hooks("expire", file_path)
+
+    updated_rotation = rotate_team(updated_rotation)
+    updated_rotation.timer.remaining = updated_rotation.timer.total
+
+    update_rotation_file(file_path, updated_rotation)
+    print("Rotation complete. Use 'rotate start' to start the next timer.")
+
+    return updated_rotation
+
+
+def start_daemon(file_path: str, update_interval: int = 1):
+    print(f"Starting daemon for {file_path}...")
+
+    setup_signal_handlers(file_path)
+    cleanup_ipc_file(file_path)
+
+    try:
+        rotation, total_seconds, remaining_seconds = load_initial_rotation(file_path)
+    except Exception:
         return
 
     start_timestamp = datetime.now()
@@ -68,65 +151,22 @@ def start_daemon(file_path: str, update_interval: int = 1):
             command = read_command(file_path)
             if command:
                 print(f"Received command: {command}")
-
-                if command == "pause":
-                    if not is_paused:
-                        is_paused = True
-                        pause_timestamp = datetime.now()
-                        print("Timer paused")
-                elif command == "resume":
-                    if is_paused and pause_timestamp is not None:
-                        pause_duration = (
-                            datetime.now() - pause_timestamp
-                        ).total_seconds()
-                        start_timestamp = start_timestamp + timedelta(
-                            seconds=pause_duration
-                        )
-                        is_paused = False
-                        print(f"Timer resumed (paused for {pause_duration:.1f}s)")
-                elif command == "stop":
-                    print("Stopping daemon...")
+                is_paused, pause_timestamp, start_timestamp, should_stop = (
+                    handle_command(command, is_paused, pause_timestamp, start_timestamp)
+                )
+                if should_stop:
                     break
 
             if is_paused:
                 time.sleep(update_interval)
                 continue
 
-            now = datetime.now()
-            seconds_since_start = (now - start_timestamp).total_seconds()
-
-            new_remaining_seconds = remaining_seconds - seconds_since_start
-
-            if new_remaining_seconds < 0:
-                new_remaining_seconds = 0
-
-            remaining_time = timedelta_to_time(timedelta(seconds=new_remaining_seconds))
-
-            updated_timer = Timer(remaining=remaining_time, total=rotation.timer.total)
-            updated_rotation = Rotation(
-                timer=updated_timer, positions=rotation.positions, team=rotation.team
+            updated_rotation, new_remaining_seconds, timer_expired = update_timer(
+                file_path, rotation, remaining_seconds, total_seconds, start_timestamp
             )
 
-            update_rotation_file(file_path, updated_rotation)
-
-            elapsed = total_seconds - new_remaining_seconds
-            print(
-                f"Updated: Remaining: {time_to_str(remaining_time)}, "
-                f"Elapsed: {int(elapsed // 60)}:{int(elapsed % 60):02d}"
-            )
-
-            if new_remaining_seconds <= 0:
-                print("\nTimer expired! Triggering rotation...")
-
-                print("Triggering expire hook...")
-                execute_hooks("expire", file_path)
-
-                updated_rotation = rotate_team(updated_rotation)
-                updated_rotation.timer.remaining = updated_rotation.timer.total
-
-                update_rotation_file(file_path, updated_rotation)
-
-                print("Rotation complete. Use 'rotate start' to start the next timer.")
+            if timer_expired:
+                updated_rotation = handle_timer_expiration(file_path, updated_rotation)
                 break
 
             time.sleep(update_interval)
