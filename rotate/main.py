@@ -4,7 +4,11 @@ import os
 import subprocess
 from rotate.hooks import ensure_hooks_directory_exists
 from rotate.rotate import rotate_team
-from rotate.rotation import read_rotation_file, write_rotation_file, create_rotation_file
+from rotate.rotation import (
+    read_rotation_file,
+    write_rotation_file,
+    create_rotation_file,
+)
 from rotate.ipc import write_command
 
 
