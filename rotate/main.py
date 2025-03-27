@@ -195,58 +195,27 @@ def rotate_team_members():
 def cat_rotation_file():
     """Display the content of the rotation file to stdout."""
     from rotate.hooks import get_default_rotation_file_path
+    from rotate.rotation import cat_rotation_file as cat_file
 
     # Determine rotation file path
     file_path = get_default_rotation_file_path()
     if len(sys.argv) >= 3:
         file_path = sys.argv[2]
 
-    try:
-        # Read and print file content
-        with open(file_path, "r") as f:
-            content = f.read()
-
-        print(content, end="")
-    except FileNotFoundError:
-        print(f"Error: Rotation file not found: {file_path}")
-    except Exception as e:
-        print(f"Error reading rotation file: {e}")
+    cat_file(file_path)
 
 
 def open_rotation_file():
     """Open the rotation file in the default editor."""
     from rotate.hooks import get_default_rotation_file_path
+    from rotate.rotation import open_rotation_file as open_file
 
     # Determine rotation file path
     file_path = get_default_rotation_file_path()
     if len(sys.argv) >= 3:
         file_path = sys.argv[2]
 
-    # Check if rotation file exists
-    if not os.path.exists(file_path):
-        print(f"Error: Rotation file not found: {file_path}")
-        return
-
-    try:
-        # Determine editor to use
-        editor = os.environ.get("EDITOR", os.environ.get("VISUAL", None))
-
-        if editor:
-            # Use specified editor from environment variable
-            subprocess.Popen([editor, file_path])
-            print(f"Opened {file_path} with {editor}")
-        else:
-            # Try to use platform-specific open command
-            if sys.platform == "darwin":  # macOS
-                subprocess.Popen(["open", file_path])
-            elif sys.platform == "win32":  # Windows
-                os.startfile(file_path)
-            else:  # Linux/Unix
-                subprocess.Popen(["xdg-open", file_path])
-
-            print(f"Opened {file_path} with default application")
-    except Exception as e:
-        print(f"Error opening rotation file: {e}")
+    open_file(file_path)
 
 
 if __name__ == "__main__":
