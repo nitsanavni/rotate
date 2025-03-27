@@ -3,8 +3,9 @@ import sys
 import os
 import subprocess
 from rotate.hooks import ensure_hooks_directory_exists
-from rotate.parse import parse_rotation_file, format_rotation
 from rotate.rotate import rotate_team
+from rotate.rotation import read_rotation_file, write_rotation_file, create_rotation_file
+from rotate.ipc import write_command
 
 
 def main():
@@ -77,11 +78,6 @@ def init_rotation():
     if len(sys.argv) < 3:
         team_members_start = 2
 
-    # Check if file already exists
-    if os.path.exists(output_path):
-        print(f"Error: File already exists: {output_path}")
-        return
-
     # Get team members from arguments or use defaults
     team_members = (
         sys.argv[team_members_start:]
@@ -89,30 +85,17 @@ def init_rotation():
         else ["Alice", "Bob", "Charlie", "Diana", "Eva"]
     )
 
-    # Create rotation file
-    with open(output_path, "w") as f:
-        f.write("5:00 / 5:00\n")
-        if len(team_members) > 0:
-            f.write(f"Typing: {team_members[0]}\n")
-        if len(team_members) > 1:
-            f.write(f"Talking: {team_members[1]}\n")
-        if len(team_members) > 2:
-            f.write(f"Next: {team_members[2]}\n")
-
-        # Add remaining team members
-        for member in team_members[3:]:
-            f.write(f"{member}\n")
-
-    print(f"Rotation file created: {output_path}")
+    try:
+        # Create rotation file
+        create_rotation_file(output_path, team_members)
+        print(f"Rotation file created: {output_path}")
+    except FileExistsError:
+        print(f"Error: File already exists: {output_path}")
+        return
 
     # Create hooks directory
     hooks_dir = ensure_hooks_directory_exists()
     print(f"Hooks directory created: {hooks_dir}")
-
-
-def get_ipc_file_path(rotation_file_path: str) -> str:
-    """Generate the IPC file path based on the rotation file path."""
-    return f"{rotation_file_path}.ipc"
 
 
 def send_command(command: str):
@@ -129,9 +112,7 @@ def send_command(command: str):
         return
 
     # Create IPC file
-    ipc_file_path = get_ipc_file_path(file_path)
-    with open(ipc_file_path, "w") as f:
-        f.write(command)
+    write_command(file_path, command)
 
     print(f"Sent '{command}' command for {file_path}")
 
@@ -187,33 +168,22 @@ def rotate_team_members():
     if len(sys.argv) > args_idx:
         file_path = sys.argv[args_idx]
 
-    # Check if rotation file exists
-    if not os.path.exists(file_path):
-        print(f"Error: Rotation file not found: {file_path}")
-        return
-
     try:
         # Read current rotation
-        with open(file_path, "r") as f:
-            content = f.read()
-
-        # Parse the rotation file
-        rotation = parse_rotation_file(content)
+        rotation = read_rotation_file(file_path)
 
         # Rotate the team multiple times if specified
         rotated = rotation
         for _ in range(count):
             rotated = rotate_team(rotated)
 
-        # Format the rotated rotation
-        output = format_rotation(rotated)
-
         # Write back to file
-        with open(file_path, "w") as f:
-            f.write(output)
+        write_rotation_file(file_path, rotated)
 
         times = "time" if count == 1 else "times"
         print(f"Team rotated {count} {times} in {file_path}")
+    except FileNotFoundError:
+        print(f"Error: Rotation file not found: {file_path}")
     except Exception as e:
         print(f"Error rotating team: {e}")
 
@@ -227,17 +197,14 @@ def cat_rotation_file():
     if len(sys.argv) >= 3:
         file_path = sys.argv[2]
 
-    # Check if rotation file exists
-    if not os.path.exists(file_path):
-        print(f"Error: Rotation file not found: {file_path}")
-        return
-
     try:
         # Read and print file content
         with open(file_path, "r") as f:
             content = f.read()
 
         print(content, end="")
+    except FileNotFoundError:
+        print(f"Error: Rotation file not found: {file_path}")
     except Exception as e:
         print(f"Error reading rotation file: {e}")
 

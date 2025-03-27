@@ -2,15 +2,14 @@
 import sys
 import time
 import signal
-import os
 from datetime import datetime, timedelta
 from rotate.parse import (
-    parse_rotation_file,
-    format_rotation,
     Timer,
     Rotation,
     time_to_str,
 )
+from rotate.rotation import read_rotation_file, write_rotation_file
+from rotate.ipc import read_command, cleanup_ipc_file
 from rotate.rotate import rotate_team
 from rotate.hooks import execute_hooks
 
@@ -29,32 +28,8 @@ def timedelta_to_time(td: timedelta):
 
 def update_rotation_file(file_path: str, rotation: Rotation):
     """Update the rotation file with the current rotation state."""
-    formatted = format_rotation(rotation)
-    with open(file_path, "w") as f:
-        f.write(formatted)
+    write_rotation_file(file_path, rotation)
     print(f"File updated: {file_path}")
-
-
-def get_ipc_file_path(rotation_file_path: str) -> str:
-    """Generate the IPC file path based on the rotation file path."""
-    return f"{rotation_file_path}.ipc"
-
-
-def read_ipc_commands(ipc_file_path: str):
-    """Read commands from the IPC file and then delete it."""
-    if not os.path.exists(ipc_file_path):
-        return None
-
-    try:
-        with open(ipc_file_path, "r") as f:
-            command = f.read().strip()
-
-        # Delete the file after reading
-        os.unlink(ipc_file_path)
-        return command
-    except Exception as e:
-        print(f"Error reading IPC file: {e}")
-        return None
 
 
 def start_daemon(file_path: str, update_interval: int = 1):
@@ -76,25 +51,20 @@ def start_daemon(file_path: str, update_interval: int = 1):
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
 
-    # IPC file path
-    ipc_file_path = get_ipc_file_path(file_path)
-
     # Clean up any existing IPC file
-    if os.path.exists(ipc_file_path):
-        os.unlink(ipc_file_path)
+    cleanup_ipc_file(file_path)
 
     # Read the initial rotation file
-    with open(file_path, "r") as f:
-        content = f.read()
+    try:
+        rotation = read_rotation_file(file_path)
+        print(f"Initial content loaded from: {file_path}")
 
-    print(f"Initial content: {content.strip()}")
-
-    # Parse rotation
-    rotation = parse_rotation_file(content)
-
-    # Get time values
-    total_seconds = time_to_timedelta(rotation.timer.total).total_seconds()
-    remaining_seconds = time_to_timedelta(rotation.timer.remaining).total_seconds()
+        # Get time values
+        total_seconds = time_to_timedelta(rotation.timer.total).total_seconds()
+        remaining_seconds = time_to_timedelta(rotation.timer.remaining).total_seconds()
+    except Exception as e:
+        print(f"Error reading rotation file: {e}")
+        return
 
     # Start time
     start_timestamp = datetime.now()
@@ -112,7 +82,7 @@ def start_daemon(file_path: str, update_interval: int = 1):
     while True:
         try:
             # Check for IPC commands
-            command = read_ipc_commands(ipc_file_path)
+            command = read_command(file_path)
             if command:
                 print(f"Received command: {command}")
 
