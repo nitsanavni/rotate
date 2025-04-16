@@ -26,7 +26,18 @@ def main():
     if args.command == "init":
         print("[STUB] Initializing rotation session...")
     elif args.command == "start":
-        print("[STUB] Starting rotation timer...")
+        import subprocess
+        import os
+        # Launch timer_worker.py as a detached subprocess
+        script = os.path.join(os.path.dirname(__file__), "timer_worker.py")
+        try:
+            subprocess.Popen([
+                sys.executable, script
+            ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+            print("Timer started in background.")
+        except Exception as e:
+            print(f"Failed to start timer: {e}", file=sys.stderr)
+            sys.exit(1)
     elif args.command == "stop":
         print("[STUB] Stopping rotation timer...")
     elif args.command == "rotate":
