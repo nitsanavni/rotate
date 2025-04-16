@@ -24,7 +24,55 @@ def main():
 
     # Command dispatch (stub)
     if args.command == "init":
-        print("[STUB] Initializing rotation session...")
+        import os
+        from rotation import RotationState, ROTATION_FILE, HOOKS_DIR
+        import shutil
+
+        # Parse non-interactive flag
+        import sys
+        non_interactive = "-y" in sys.argv
+
+        if non_interactive:
+            # Use defaults
+            people = ["Nitsan", "Michael", "Bob", "Jay", "Julie"]
+            positions = ["Talking", "Typing", "Next"]
+            duration_seconds = 4 * 60
+        else:
+            # Interactive prompts
+            print("Enter names (comma-separated or one per line, blank to finish):")
+            names = []
+            while True:
+                line = input()
+                if not line.strip():
+                    break
+                if "," in line:
+                    names += [n.strip() for n in line.split(",") if n.strip()]
+                    break
+                else:
+                    names.append(line.strip())
+            people = names if names else ["Nitsan", "Michael", "Bob", "Jay", "Julie"]
+            pos_in = input("Enter positions (comma-separated, default: Talking,Typing,Next): ").strip()
+            positions = [p.strip() for p in pos_in.split(",")] if pos_in else ["Talking", "Typing", "Next"]
+            dur_in = input("Enter turn duration in minutes (default 4): ").strip()
+            try:
+                duration_seconds = int(float(dur_in) * 60) if dur_in else 4 * 60
+            except Exception:
+                duration_seconds = 4 * 60
+
+        # Create rotation state and write file
+        state = RotationState(positions, people, duration_seconds)
+        state.write_to_file()
+        print(f"Rotation session initialized with {len(people)} people, positions: {positions}, duration: {duration_seconds//60}:{duration_seconds%60:02d}")
+
+        # Create default hook if not present
+        os.makedirs(HOOKS_DIR, exist_ok=True)
+        hook_path = os.path.join(HOOKS_DIR, "expire-open.sh")
+        if not os.path.exists(hook_path):
+            with open(hook_path, "w") as f:
+                f.write("#!/bin/sh\nrotate open\n")
+            os.chmod(hook_path, 0o755)
+            print(f"Default hook created at {hook_path}")
+
     elif args.command == "start":
         import subprocess
         import os
