@@ -14,7 +14,7 @@ def cli():
 def init(yes):
     """Initialize a new rotation session."""
     import os
-    from rotation import RotationState, ROTATION_FILE, HOOKS_DIR
+    from .rotation import RotationState, ROTATION_FILE, HOOKS_DIR
     import shutil
 
     if yes:
