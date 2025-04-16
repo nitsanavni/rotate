@@ -41,7 +41,12 @@
     - Handle hooks execution on timer expiry.
   - Added unit and approval tests for rotation state transitions and file output.
 
-- [ ] Refactor timer to run as a detached subprocess for non-blocking UX:
-  - Update CLI and timer logic so that `rotate start` launches the timer as a background process (subprocess), allowing the CLI to return immediately and not block the terminal.
-  - Ensure users can continue working in their terminal while the timer is running in the background.
-  - Update documentation and tests as needed.
+- [x] Refactor timer to run as a detached subprocess for non-blocking UX:
+  - Updated CLI and timer logic so that `rotate start` launches the timer as a background process (subprocess), allowing the CLI to return immediately and not block the terminal.
+  - Users can continue working in their terminal while the timer is running in the background.
+  - Updated documentation and tests as needed.
+
+- [ ] Implement the `init` command:
+  - Implement the `rotate init` command to create a new rotation session, prompt for or accept names, positions, and duration, and write the initial rotation file.
+  - Support both interactive and non-interactive modes as described in the spec.
+  - Add tests for initialization and file output.
