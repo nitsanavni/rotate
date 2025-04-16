@@ -1,1 +1,15 @@
+Usage: python -m rotate [OPTIONS] COMMAND [ARGS]...
 
+  A CLI tool for file rotation and session management.
+
+Options:
+  --help  Show this message and exit.
+
+Commands:
+  init       Initialize a new rotation session.
+  open       Open the current item.
+  randomize  Randomize the rotation order.
+  rotate     Manually rotate to the next item.
+  start      Start the rotation timer.
+  stop       Stop the rotation timer.
+  watch      Watch for changes and auto-rotate.
