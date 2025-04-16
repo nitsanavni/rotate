@@ -32,11 +32,16 @@
   - Configured ApprovalTests to use the native reporter so mismatches are visible in the CLI.
   - All tests pass as of 2025-04-16.
 
-- [ ] Implement the core rotation and timer logic:
-  - Create `rotation.py` to manage the rotation state, timer countdown, and file I/O for `.rotate/rotation`.
-  - Implement functions to:
+- [x] Implement the core rotation and timer logic:
+  - Created `rotation.py` to manage the rotation state, timer countdown, and file I/O for `.rotate/rotation`.
+  - Implemented functions to:
     - Initialize a new rotation session (names, positions, duration).
-    - Start/stop the timer and update the rotation file in real time.
+    - Start/stop the timer and update the rotation file in real time (current implementation uses threading; see next step for UX improvement).
     - Trigger manual and automatic rotations.
     - Handle hooks execution on timer expiry.
-  - Add unit and approval tests for rotation state transitions and file output.
+  - Added unit and approval tests for rotation state transitions and file output.
+
+- [ ] Refactor timer to run as a detached subprocess for non-blocking UX:
+  - Update CLI and timer logic so that `rotate start` launches the timer as a background process (subprocess), allowing the CLI to return immediately and not block the terminal.
+  - Ensure users can continue working in their terminal while the timer is running in the background.
+  - Update documentation and tests as needed.

@@ -60,7 +60,8 @@
 
 - **`rotate start`**
 
-  - Starts the countdown timer in the background.
+  - Starts the countdown timer as a detached background process (subprocess).
+  - The CLI returns immediately, allowing the user to continue working in their terminal while the timer runs in the background.
   - The timer updates the rotation file in real time (with one-second precision) but does not print updates to the terminal.
 
 - **`rotate stop`**
@@ -96,6 +97,10 @@
     - Each hook’s output is logged to a corresponding file in the hooks directory (e.g., `.rotate/hooks/expire-open.sh.log`).
 
 ## User Interaction & Dynamic Updates
+
+- **Timer Process UX:**
+  - When the timer is started (`rotate start`), it runs as a separate, detached background process. The CLI does not block the terminal, and users can continue to use their shell as normal.
+  - Users can stop the timer with `rotate stop`, which will terminate the background process.
 
 - **Direct File Editing:**
   - Users can directly edit the rotation file to update names and positions.
