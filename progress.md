@@ -54,3 +54,7 @@
 - [ ] Add tests for initialization and file output:
   - Write tests to verify the correct creation of the rotation file and hook after running `rotate init` in both modes.
   - Use ApprovalTests to check file outputs.
+
+- [ ] Refactor CLI argument parsing to use a higher-level package (e.g., Typer, Click, or similar):
+  - Replace argparse with a package that provides a more ergonomic and declarative API.
+  - Ensure all current CLI features and help output are preserved.
