@@ -46,7 +46,11 @@
   - Users can continue working in their terminal while the timer is running in the background.
   - Updated documentation and tests as needed.
 
-- [ ] Implement the `init` command:
-  - Implement the `rotate init` command to create a new rotation session, prompt for or accept names, positions, and duration, and write the initial rotation file.
-  - Support both interactive and non-interactive modes as described in the spec.
-  - Add tests for initialization and file output.
+- [x] Implement the `init` command:
+  - Implemented the `rotate init` command to create a new rotation session, prompt for or accept names, positions, and duration, and write the initial rotation file.
+  - Supports both interactive and non-interactive modes as described in the spec.
+  - Creates the default hook if not present.
+
+- [ ] Add tests for initialization and file output:
+  - Write tests to verify the correct creation of the rotation file and hook after running `rotate init` in both modes.
+  - Use ApprovalTests to check file outputs.
