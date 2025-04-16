@@ -1,0 +1,16 @@
+usage: rotate [-h] {init,start,stop,rotate,randomize,watch,open} ...
+
+A CLI tool for file rotation and session management.
+
+positional arguments:
+  {init,start,stop,rotate,randomize,watch,open}
+    init                Initialize a new rotation session.
+    start               Start the rotation timer.
+    stop                Stop the rotation timer.
+    rotate              Manually rotate to the next item.
+    randomize           Randomize the rotation order.
+    watch               Watch for changes and auto-rotate.
+    open                Open the current item.
+
+options:
+  -h, --help            show this help message and exit

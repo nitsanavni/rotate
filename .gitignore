@@ -1,0 +1,4 @@
+# Ignore all received files
+*.received.*
+# Ignore Python cache
+__pycache__/
