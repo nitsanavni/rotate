@@ -31,3 +31,12 @@
   - Wrote tests that invoke the CLI with no arguments and with basic commands, verifying that the output matches the expected default/help output as described in the spec.
   - Configured ApprovalTests to use the native reporter so mismatches are visible in the CLI.
   - All tests pass as of 2025-04-16.
+
+- [ ] Implement the core rotation and timer logic:
+  - Create `rotation.py` to manage the rotation state, timer countdown, and file I/O for `.rotate/rotation`.
+  - Implement functions to:
+    - Initialize a new rotation session (names, positions, duration).
+    - Start/stop the timer and update the rotation file in real time.
+    - Trigger manual and automatic rotations.
+    - Handle hooks execution on timer expiry.
+  - Add unit and approval tests for rotation state transitions and file output.
