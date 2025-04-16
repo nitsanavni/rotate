@@ -27,5 +27,7 @@
   - Created `rotate/__main__.py` to allow running `python -m rotate`.
   - Created `rotate/cli.py` to parse commands (`init`, `start`, `stop`, `rotate`, `randomize`, `watch`, `open`) and dispatch to appropriate functions (currently as stubs).
 
-- [ ] Add tests, specifically to test the CLI default output:
-  - Write tests that invoke the CLI with no arguments and with basic commands, verifying that the output matches the expected default/help output as described in the spec.
+- [x] Add tests, specifically to test the CLI default output:
+  - Wrote tests that invoke the CLI with no arguments and with basic commands, verifying that the output matches the expected default/help output as described in the spec.
+  - Configured ApprovalTests to use the native reporter so mismatches are visible in the CLI.
+  - All tests pass as of 2025-04-16.
