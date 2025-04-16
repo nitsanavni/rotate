@@ -1,0 +1,1 @@
+prefer `git status -s` over `git status`
