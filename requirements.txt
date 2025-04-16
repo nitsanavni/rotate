@@ -1,1 +1,3 @@
 # Dependencies for the rotate CLI tool
+pytest
+approvaltests
